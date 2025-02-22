@@ -15,6 +15,8 @@ await channel.QueueDeclareAsync(queue: queueName,
                                 autoDelete: false,
                                 arguments: null);
 
+Console.WriteLine("RabbitMQ Consumer is running.");
+
 var consumer = new AsyncEventingBasicConsumer(channel);
 
 consumer.ReceivedAsync += (model, eventArgs) =>

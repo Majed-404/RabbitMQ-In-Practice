@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using RabbitMQ.Client;
 
-
 var factory = new ConnectionFactory { HostName = "localhost" };
 using var connection = await factory.CreateConnectionAsync();
 using var channel = await connection.CreateChannelAsync();
@@ -14,11 +13,33 @@ await channel.QueueDeclareAsync(queue: queueName,
                                 autoDelete: false,
                                 arguments: null);
 
-var message = $"Hello from producer {DateTime.Now.ToString("dd-MM-yyyy HH:mm:ss")}";
-var messageEncoded = Encoding.UTF8.GetBytes(message);
+Console.WriteLine("RabbitMQ Producer is running.");
 
-await channel.BasicPublishAsync(exchange: string.Empty,
-                                routingKey: queueName,
-                                body: messageEncoded);
+while (true)
+{
+    Console.Write("Enter message: ");
+    string? message = Console.ReadLine();
 
-Console.WriteLine($"Messaged Published: {message}");
+    if (string.IsNullOrWhiteSpace(message))
+    {
+        Console.WriteLine("Message cannot be empty. Try again.");
+        continue;
+    }
+
+    var messageEncoded = Encoding.UTF8.GetBytes(message);
+
+    await channel.BasicPublishAsync(exchange: string.Empty,
+                                    routingKey: queueName,
+                                    body: messageEncoded);
+
+    Console.WriteLine($"Message Published: {message}");
+
+    Console.Write("Do you want to send another message? (yes to continue, exit to quit): ");
+    string? response = Console.ReadLine()?.Trim().ToLower();
+
+    if (response == "exit")
+    {
+        Console.WriteLine("Exiting application...");
+        break;
+    }
+}
